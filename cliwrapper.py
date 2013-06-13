@@ -8,7 +8,6 @@
 '''Module for graphically managing command line options for a given command.'''
 
 import sys
-from Tkinter import *
 
 class CLIWrapper:
     
@@ -24,58 +23,6 @@ class CLIWrapper:
         self.options = []
         for arg in args:
             self.options.append([arg[0],arg[1],''])
-     
-    def get_options(self):   
-        self.root = Tk()
-        
-        body = Frame(self.root)
-        self.body(body)
-        body.pack(padx=5,pady=5)
-        
-        self.root.protocol("WM_DELETE_WINDOW",self.cancel)
-        
-        self.root.mainloop()
-            
-#****** Create GUI ******
-            
-    def body(self,master):
-        pass
-        
-    def new_string(self):
-        pass
-        
-    def new_path(self):
-        pass
-        
-    def new_menu(self):
-        pass
-        
-    def new_int(self):
-        pass
-        
-    def new_double(self):
-        pass
-            
-    def buttonbox(self):
-        pass
-        
-#****** Apply Selected Options ******
-        
-    def run(self, event=''):
-        pass
-        
-    def cancel(self, event=''):
-        # Close window
-        self.root.quit()
-        
-    def validate(self):
-        return 1
-        
-    def apply(self):
-        pass
-            
-    def run_command(self):
-        pass
         
 #****** Manage Options ******
             

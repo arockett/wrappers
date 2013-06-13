@@ -1,0 +1,19 @@
+Workflow:
+
+	user opens program
+			|
+	program runs a CLIWrapper by passing list of opt_name, opt_rep tuples
+			|
+	main program is called through CLIWrapper with option args
+	
+args in init:
+- a list of tuples of the form: (option name, option representation)
+- option name used to label option in GUI
+- option representation used to specify option type
+	- '-o'			  		stand-alone option -o takes no argument
+	- '-o:'			  		takes a string argument
+	- '-o:_path_'	  		takes file path argument
+	- '-o:arg1,arg2   		arg can be any of the following comma separated args but nothing else
+	- '-o:_int_,min,max'	takes an integer arg between min and max (use * to unbound one or the other)
+	- '-o:_double_,min,max' takes a double arg between min and max (use * to unbound one or the other)
+	

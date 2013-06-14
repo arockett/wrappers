@@ -5,18 +5,17 @@
 #   Aaron Beckett
 #
 #
-'''Module for graphically managing command line options for a given command.'''
+'''Gui used by CLIWrapper to get user inputted options.'''
 
 from Tkinter import *
 
-class Gui:
+class OptionInputGui:
     
     def __init__(self,command,args,options):
         self.command = command
         self.args = args
         self.options = options
-    
-    def get_options(self):   
+      
         self.root = Tk()
         
         body = Frame(self.root)
@@ -25,7 +24,7 @@ class Gui:
         
         self.root.protocol("WM_DELETE_WINDOW",self.cancel)
         
-        self.result = self.options
+        self.result = self.command,self.args,self.options
         
         self.root.mainloop()
             
@@ -50,9 +49,21 @@ class Gui:
         pass
             
     def buttonbox(self):
-        pass
+        # add standard button box. override if you don't want the
+        # standard buttons
+        box = Frame(self.root)
+
+        w = Button(box, text="Cancel", width=10, command=self.cancel)
+        w.pack(side=RIGHT, padx=5, pady=5)
+        w = Button(box, text="Run", width=10, command=self.run, default=ACTIVE)
+        w.pack(side=RIGHT,padx=5, pady=5)
+
+        self.root.bind("&lt;Return>", self.ok)
+        self.root.bind("&lt;Escape>", self.cancel)
+
+        box.pack()
         
-#****** Apply Selected Options ******
+#****** Standar Button Semantics ******
         
     def run(self, event=''):
         # Store entered options and run command with those options
@@ -64,8 +75,6 @@ class Gui:
         
         self.apply()
         
-        self.run_command()
-        
         self.cancel()
         
     def cancel(self, event=''):
@@ -76,7 +85,6 @@ class Gui:
         return 1
         
     def apply(self):
-        pass
+        raise NotImplementedError
             
-    def run_command(self):
-        pass
+

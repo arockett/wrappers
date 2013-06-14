@@ -7,7 +7,7 @@
 #
 '''Module for graphically managing command line options for a given command.'''
 
-import sys, subprocess
+import os, sys
 from Wrapper import BasicWrapper
 from wrappergui import OptionInputGui
 
@@ -35,7 +35,10 @@ class CLIWrapper(BasicWrapper):
     def get_options(self):
         '''Use an OptionInputGui to get all necessary options.'''
         gui = OptionInputGui(self.base_command,self.args,self.options)
-        self.base_command,self.args,self.options = gui.result
+        if gui.result:
+            self.base_command,self.args,self.options = gui.result
+        else:
+            sys.exit(1)
         
     def build_command(self):
         self.command = ''
@@ -48,7 +51,8 @@ class CLIWrapper(BasicWrapper):
         
     def run_command(self):
         '''Run the command built from the OptionInputGui results.'''
-        self.build_command()   
+        self.build_command()
+        print self.command 
         BasicWrapper.run_command(self)
         
 #****** Manage Options ******
@@ -64,11 +68,12 @@ class CLIWrapper(BasicWrapper):
             
     
 
-def main(argc,argv):
+def main():
     '''Open a blank CLIWrapper for editting and automatically run the command it generates.'''
+    os.chdir('../chamview')
     wrapper = CLIWrapper(command='python chamview.py',
                          args=[('Input Directory','-d:_dir_'),
-                               ('Output File','-o:_file_:("Text File","*.txt")')])
+                               ('Output File','-o:_file_:Text File,*.txt')])
     wrapper.wrap()
 
 if __name__ == '__main__':

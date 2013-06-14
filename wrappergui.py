@@ -24,7 +24,7 @@ class OptionInputGui:
         self.body(body)
         body.pack(padx=5,pady=5)
         
-        self.root.protocol("WM_DELETE_WINDOW",self.root.cancel)
+        self.root.protocol("WM_DELETE_WINDOW",self.root.destroy)
         
         self.result = self.command, self.args, self.options
         
@@ -35,7 +35,7 @@ class OptionInputGui:
     def body(self,master):
         # Fill Option Frame
         opt_frame = Frame(master)
-        for opt in options:
+        for opt in self.options:
             blueprint = self.parse_arg(opt[1])
             if len(blueprint) == 1:
                 continue
@@ -45,9 +45,10 @@ class OptionInputGui:
             elif blueprint[1] == '_file_':
                 opt[2] = StringVar()
                 try:
-                    self.new_file(opt_frame,opt[0],blueprint[2:],opt[2])
+                    filetypes = [tuple(ft.split(',')) for ft in blueprint[2:]]
+                    self.new_file(opt_frame,opt[0],opt[2],filetypes)
                 except IndexError:
-                    self.new_file(opt_frame,opt[0],var=opt[2])
+                    self.new_file(opt_frame,opt[0],opt[2])
             elif blueprint[1] == '_dir_':
                 opt[2] = StringVar()
                 self.new_directory(opt_frame,opt[0],opt[2])
@@ -57,6 +58,7 @@ class OptionInputGui:
                 continue
             else:
                 continue
+            opt[1] = blueprint[0]
         opt_frame.pack()
         
         #Make buttonbox
@@ -82,14 +84,14 @@ class OptionInputGui:
         
         box.pack()
         
-    def new_file(self,master,name,ext=[('All Types','*')],var):
+    def new_file(self,master,name,var,ext=[('All Types','*')]):
         box = Frame(master)
         
         label = Label(box, text=name)
         label.pack(padx=5)
         
-        entry = Entry(box, width=20, relief=SUNKEN, textvariable=var)
-        entry.bind("<Button-1>", lambda x: self.select_file(ext))
+        entry = Entry(box, width=40, relief=SUNKEN, textvariable=var)
+        entry.bind("<Button-1>", lambda e: self.select_file(ext,e))
         entry.pack(padx=5,pady=10)
         
         box.pack()
@@ -99,8 +101,18 @@ class OptionInputGui:
                                             initialdir=os.getcwd(),
                                             title='Choose File')
         if path:
-            widget.delete(0,END)
-            widget.insert(0,path)
+            # Account for spaces in the path
+            print path
+            dirs = path.split('/')
+            for i in range(len(dirs)):
+                for ch in dirs[i]:
+                    if ch.isspace():
+                        dirs[i] = '"'+dirs[i]+'"'
+            path = '/'.join(dirs)
+            print path
+            
+            event.widget.delete(0,END)
+            event.widget.insert(0,path)
             
     def new_directory(self,master,name,var):
         box = Frame(master)
@@ -108,20 +120,30 @@ class OptionInputGui:
         label = Label(box, text=name)
         label.pack(padx=5)
         
-        entry = Entry(box, width=20, relief=SUNKEN, textvariable=var)
+        entry = Entry(box, width=40, relief=SUNKEN, textvariable=var)
         entry.bind("<Button-1>", self.select_dir)
         entry.pack(padx=5,pady=10)
         
         box.pack()
         
-    def select_file(self,event=''):
+    def select_dir(self,event=''):
         path = tkFileDialog.askdirectory(initialdir=os.getcwd(),
                                          title='Choose Directory')
         if path:
-            widget.delete(0,END)
-            widget.insert(0,path)
+            # Account for spaces in the path
+            print path
+            dirs = path.split('/')
+            for i in range(len(dirs)):
+                for ch in dirs[i]:
+                    if ch.isspace():
+                        dirs[i] = '"'+dirs[i]+'"'
+            path = '/'.join(dirs)
+            print path
+            
+            event.widget.delete(0,END)
+            event.widget.insert(0,path)
         
-    def new_menu(self,master,name,opts=[],var):
+    def new_menu(self,master,name,var,opts=[]):
         pass
         
     def new_int(self,master,name,var):
@@ -140,7 +162,7 @@ class OptionInputGui:
         w = Button(box, text="Run", width=10, command=self.run, default=ACTIVE)
         w.pack(side=RIGHT,padx=5, pady=5)
 
-        self.root.bind("&lt;Return>", self.ok)
+        self.root.bind("&lt;Return>", self.run)
         self.root.bind("&lt;Escape>", self.cancel)
 
         box.pack()
@@ -157,17 +179,17 @@ class OptionInputGui:
         
         self.apply()
         
-        self.cancel()
+        self.root.quit()
         
     def cancel(self, event=''):
         # Close window
+        self.result = None
         self.root.quit()
         
     def validate(self):
         return 1
         
     def apply(self):
-        self.command = self.cmd.get()
         for opt in self.options:
             opt[2] = opt[2].get()
             if not isinstance(opt[2],bool):

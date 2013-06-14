@@ -66,7 +66,9 @@ class CLIWrapper(BasicWrapper):
 
 def main(argc,argv):
     '''Open a blank CLIWrapper for editting and automatically run the command it generates.'''
-    wrapper = CLIWrapper()
+    wrapper = CLIWrapper(command='python chamview.py',
+                         args=[('Input Directory','-d:_dir_'),
+                               ('Output File','-o:_file_:("Text File","*.txt")')])
     wrapper.wrap()
 
 if __name__ == '__main__':

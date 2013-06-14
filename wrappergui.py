@@ -42,18 +42,21 @@ class OptionInputGui:
             elif blueprint[1] == '':
                 opt[2] = StringVar()
                 self.new_string(opt_frame,opt[0],opt[2])
-            elif blueprint[1][0] == '_file_':
+            elif blueprint[1] == '_file_':
                 opt[2] = StringVar()
-                self.new_file(opt_frame,opt[0],blueprint[1][1:],opt[2])
-            elif blueprint[1][0] == '_dir_':
+                try:
+                    self.new_file(opt_frame,opt[0],blueprint[2:],opt[2])
+                except IndexError:
+                    self.new_file(opt_frame,opt[0],var=opt[2])
+            elif blueprint[1] == '_dir_':
                 opt[2] = StringVar()
                 self.new_directory(opt_frame,opt[0],opt[2])
-            elif blueprint[1][0] == '_int_':
-                pass
-            elif blueprint[1][0] == '_double_':
-                pass
+            elif blueprint[1] == '_int_':
+                continue
+            elif blueprint[1] == '_double_':
+                continue
             else:
-                pass
+                continue
         opt_frame.pack()
         
         #Make buttonbox
@@ -63,11 +66,10 @@ class OptionInputGui:
         result = raw
         if ':' in result:
             result = result.split(':')
-            if len(result) > 1 and l[1] != '':
-                result[1] = result[1].split(',')
         return result
         
-    def new_bool
+    def new_bool(self,master,name,var):
+        pass
                 
     def new_string(self,master,name,var):
         box = Frame(master)

@@ -34,15 +34,16 @@ class CLIWrapper(BasicWrapper):
             
     def get_options(self):
         '''Use an OptionInputGui to get all necessary options.'''
-        result = OptionInputGui(self.base_command,self.args,self.options)
-        self.base_command,self.args,self.options = result
+        gui = OptionInputGui(self.base_command,self.args,self.options)
+        self.base_command,self.args,self.options = gui.result
         
     def build_command(self):
         self.command = ''
         self.command += self.base_command
         for name,arg,value in self.options:
-            self.command += ' '+arg
-            if value != '':
+            if value:
+                self.command += ' '+arg
+            if not isinstance(value,bool):
                 self.command += ' '+value
         
     def run_command(self):

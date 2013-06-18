@@ -8,28 +8,25 @@
 '''Gui used by CLIWrapper to get user inputted options.'''
 
 import os
-from Tkinter import *
-import tkFileDialog
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
 
-class OptionInputGui:
+class OptionInputGui(QMainWindow):
     
-    def __init__(self,command,args,options):
+    def __init__(self,command,args,options,parent=None):
+        QMainWindow.__init__(self,parent)
         self.command = command
         self.args = args
         self.options = options
-      
-        self.root = Tk()
         
-        body = Frame(self.root)
-        self.body(body)
-        body.pack(padx=5,pady=5)
+        self.root = QApplication()
+        self.root.setWindowTitle("Parameter Manager")
         
-        self.root.protocol("WM_DELETE_WINDOW",self.root.destroy)
         
         self.result = self.command, self.args, self.options
         
-        self.root.mainloop()
-            
+        self.root.exec_()
+        
 #****** Create GUI ******
             
     def body(self,master):
@@ -59,11 +56,11 @@ class OptionInputGui:
             else:
                 continue
             opt[1] = blueprint[0]
-        opt_frame.pack()
+        #opt_frame.pack()
         
         #Make buttonbox
         self.buttonbox(master)
-                    
+        
     def parse_arg(self,raw):
         result = raw
         if ':' in result:
@@ -74,32 +71,14 @@ class OptionInputGui:
         pass
                 
     def new_string(self,master,name,var):
-        box = Frame(master)
-        
-        label = Label(box, text=name)
-        label.pack(padx=5)
-        
-        entry = Entry(box, width=20, relief=SUNKEN, textvariable=var)
-        entry.pack(padx=5,pady=10)
-        
-        box.pack()
+        pass
         
     def new_file(self,master,name,var,ext=[('All Types','*')]):
-        box = Frame(master)
-        
-        label = Label(box, text=name)
-        label.pack(padx=5)
-        
-        entry = Entry(box, width=40, relief=SUNKEN, textvariable=var)
-        entry.bind("<Button-1>", lambda e: self.select_file(ext,e))
-        entry.pack(padx=5,pady=10)
-        
-        box.pack()
+        pass
         
     def select_file(self,extensions,event=''):
-        path = tkFileDialog.askopenfilename(filetypes=extensions,
-                                            initialdir=os.getcwd(),
-                                            title='Choose File')
+        path = ''
+        
         if path:
             # Account for spaces in the path
             print path
@@ -111,24 +90,15 @@ class OptionInputGui:
             path = '/'.join(dirs)
             print path
             
-            event.widget.delete(0,END)
-            event.widget.insert(0,path)
+            #event.widget.delete(0,END)
+            #event.widget.insert(0,path)
             
     def new_directory(self,master,name,var):
-        box = Frame(master)
-        
-        label = Label(box, text=name)
-        label.pack(padx=5)
-        
-        entry = Entry(box, width=40, relief=SUNKEN, textvariable=var)
-        entry.bind("<Button-1>", self.select_dir)
-        entry.pack(padx=5,pady=10)
-        
-        box.pack()
+        pass
         
     def select_dir(self,event=''):
-        path = tkFileDialog.askdirectory(initialdir=os.getcwd(),
-                                         title='Choose Directory')
+        path = ''
+        
         if path:
             # Account for spaces in the path
             print path
@@ -140,8 +110,8 @@ class OptionInputGui:
             path = '/'.join(dirs)
             print path
             
-            event.widget.delete(0,END)
-            event.widget.insert(0,path)
+            #event.widget.delete(0,END)
+            #event.widget.insert(0,path)
         
     def new_menu(self,master,name,var,opts=[]):
         pass
@@ -155,17 +125,17 @@ class OptionInputGui:
     def buttonbox(self,master):
         # add standard button box. override if you don't want the
         # standard buttons
-        box = Frame(master)
+        #box = Frame(master)
 
-        w = Button(box, text="Cancel", width=10, command=self.cancel)
-        w.pack(side=RIGHT, padx=5, pady=5)
-        w = Button(box, text="Run", width=10, command=self.run, default=ACTIVE)
-        w.pack(side=RIGHT,padx=5, pady=5)
+        #w = Button(box, text="Cancel", width=10, command=self.cancel)
+        #w.pack(side=RIGHT, padx=5, pady=5)
+        #w = Button(box, text="Run", width=10, command=self.run, default=ACTIVE)
+        #w.pack(side=RIGHT,padx=5, pady=5)
 
-        self.root.bind("&lt;Return>", self.run)
-        self.root.bind("&lt;Escape>", self.cancel)
+        #self.root.bind("&lt;Return>", self.run)
+        #self.root.bind("&lt;Escape>", self.cancel)
 
-        box.pack()
+        #box.pack()
         
 #****** Standard Button Semantics ******
         
@@ -174,8 +144,8 @@ class OptionInputGui:
         if not self.validate():
             return
             
-        self.root.withdraw()
-        self.root.update_idletasks()
+        #self.root.withdraw()
+        #self.root.update_idletasks()
         
         self.apply()
         

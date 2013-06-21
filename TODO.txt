@@ -10,11 +10,12 @@ args in init:
 - a list of tuples of the form: (option name, option representation)
 - option name used to label option in GUI
 - option representation used to specify option type
-	- '-o'			  		stand-alone option -o takes no argument
-	- '-o:'			  		takes a string argument
-	- '-o:_file_:typ1:typ2' takes file path argument
-	- '-o:_dir_'			takes a directory path argument
-	- '-o:arg1:arg2   		arg can be any of the following comma separated args but nothing else
-	- '-o:_int_:min:max'	takes an integer arg between min and max (use * to unbound one or the other)
-	- '-o:_double_:min:max' takes a double arg between min and max (use * to unbound one or the other)
+	- '-o'			    stand-alone option -o takes no argument
+	- '-o:'			    takes a string argument
+	- '-o:_file_:typ1:typ2'     takes file path argument w/ optional types separated by : and of the form :type-name,extension1,extension2:
+					ex: '-o:_file_:Text File,*.txt:Image File,*.png,*.mpg,*.jpg'
+	- '-o:_dir_'		    takes a directory path argument
+	- '-o:arg1:arg2   	    arg can be any of the following comma separated args but nothing else
+	- '-o:_int_:min:max'	    takes an integer arg between min and max (use * to unbound one or the other)
+	- '-o:_double_:min:max'     takes a double arg between min and max (use * to unbound one or the other)
 	

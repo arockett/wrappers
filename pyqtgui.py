@@ -60,16 +60,18 @@ class OptionInputWindow(QMainWindow):
 		return hline
 
 	def fill_command(self):
+		box = QVBoxLayout()
 		# Create widget for the command
-		layout.addWidget(QLabel('Command'),0)
+		box.addWidget(QLabel('Command'),0)
 		command_edit = self.new_string(self.command)
 		command_edit.setText(self.command)
 		command_edit.selectAll()
-		layout.addWidget(command_edit)
+		box.addWidget(command_edit)
+		return box
 
-	def fill_body(self,body):
+	def fill_body(self):
 		body = QVBoxLayout()
-		num_of_columns = int(len(self.options / 6.0) + 1)
+		num_of_columns = int(len(self.options) / 6.0 + 1)
 				
         # Create widgets for each option
 		for opt in self.options:
@@ -79,11 +81,10 @@ class OptionInputWindow(QMainWindow):
 				opt[2] = False
 				body.addWidget(self.new_bool(opt))
 			elif blueprint[1] == '':
-				body.addWidget(QLabel(opt[0]))
 				opt[2] = QString('')
-				body.addWidget(self.new_string(opt))
+				widget = self.add_group(opt[0],widget=self.new_string(opt),optional=True)
+				body.addWidget(widget)
 			elif blueprint[1] == '_file_':
-				body.addWidget(QLabel(opt[0]))
 				opt[2] = QString('')
 				try:
 					filetypes = [tuple(ft.split(',')) for ft in blueprint[2:]]
@@ -95,41 +96,42 @@ class OptionInputWindow(QMainWindow):
 						filetype_str = filetype_str[:-1] + ')'
 						filetype_str += ';;'
 					filetype_str = filetype_str[:-2]
-					body.addLayout(self.new_file(opt,filetype_str))
+					widget = self.add_group(opt[0],layout=self.new_file(opt,filetype_str),optional=True)
 				except IndexError:
-					body.addLayout(self.new_file(opt))
+					widget = self.add_group(opt[0],layout=self.new_file(opt),optional=True)
+				body.addWidget(widget)
 			elif blueprint[1] == '_dir_':
-				body.addWidget(QLabel(opt[0]))
 				opt[2] = QString()
-				body.addLayout(self.new_directory(opt))
+				widget = self.add_group(opt[0],layout=self.new_directory(opt),optional=True)
+				body.addWidget(widget)
 			elif blueprint[1] == '_int_':
 				box = QHBoxLayout()
-				box.addWidget(QLabel(opt[0]))
+				box.addSpacing(15)
 				try:
 					min_,max_,step = blueprint[2],blueprint[3],blueprint[4]
 					box.addWidget(self.new_int(opt,min_,max_))
 				except IndexError:
 					box.addWidget(self.new_int(opt))
-				body.addLayout(box)
+				widget = self.add_group(opt[0],layout=box,optional=True)
+				body.addWidget(widget)
 			elif blueprint[1] == '_float_':
 				box = QHBoxLayout()
-				box.addWidget(QLabel(opt[0]))
+				box.addSpacing(15)
 				try:
 					min_,max_,step = blueprint[2],blueprint[3],blueprint[4]
 					box.addWidget(self.new_float(opt,min_,max_))
 				except IndexError:
 					box.addWidget(self.new_float(opt))
-				body.addLayout(box)
+				widget = self.add_group(opt[0],layout=box,optional=True)
+				body.addWidget(widget)
 			elif blueprint[1] == '_menu_':
-				box = QHBoxLayout()
-				box.addWidget(QLabel(opt[0]))
 				opt[2] = QString('')
 				try:
 					choices = blueprint[2:]
-					box.addWidget(self.new_menu(opt,choices))
+					widget = self.add_group(opt[0],widget=self.new_menu(opt,choices),optional=True)
 				except IndexError:
-					box.addWidget(self.new_menu(opt))
-				body.addLayout(box)
+					widget = self.add_group(opt[0],widget=self.new_menu(opt),optional=True)
+				body.addWidget(widget)
 			opt[1] = blueprint[0]
 			
 		return body
@@ -141,6 +143,20 @@ class OptionInputWindow(QMainWindow):
 		else:
 			result = [result]
 		return result
+		
+	def add_group(self,name,widget=None,layout=None,optional=True):
+		group = QGroupBox(name)
+		group.setCheckable(optional)
+		if optional:
+			group.setChecked(False)
+		box = QVBoxLayout()
+		if widget:
+			box.addWidget(widget)
+		if layout:
+			box.addLayout(layout)
+		group.setLayout(box)
+		#group.toggled.connect(edit_widget)
+		return group
 		
 	def store_value(self,index,value):
 		print value

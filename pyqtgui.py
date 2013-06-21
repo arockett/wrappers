@@ -30,8 +30,19 @@ class OptionInputWindow(QMainWindow):
 		apply(QWidget.__init__, (self, ) + extra)
 
 		widget = QWidget()
-		layout = QVBoxLayout()
-		self.fill(layout)
+		layout = QGridLayout()
+		
+		# Create widget to edit the command
+		layout.addLayout(self.fill_command(),0,0)
+		# Horizontal line
+		layout.addWidget(self.horizontal_line(),1,0)
+		# Create widgets for each option
+		layout.addLayout(self.fill_body(),2,0)
+		# Horizontal line
+		layout.addWidget(self.horizontal_line(),3,0)
+		# Make buttonbox
+		layout.addLayout(self.buttonbox(),4,0)
+		
 		widget.setLayout(layout)
 		widget.setWindowTitle("Parameter Manager")
 		self.setCentralWidget(widget)
@@ -40,21 +51,26 @@ class OptionInputWindow(QMainWindow):
         
 #****** Create GUI ******
 
-	def fill(self,body):
-		# Create widget for the command
-		body.addWidget(QLabel('Command'))
-		command_edit = self.new_string(self.command)
-		command_edit.setText(self.command)
-		command_edit.selectAll()
-		body.addWidget(command_edit)
-		
+	def horizontal_line(self):
 		# Horizontal line
 		hline = QFrame()
 		hline.setFrameStyle( QFrame.HLine | QFrame.Raised )
-		hline.setLineWidth(2)
-		hline.setMidLineWidth(2)
-		body.addWidget(hline)
-		
+		hline.setLineWidth(3)
+		hline.setMidLineWidth(3)
+		return hline
+
+	def fill_command(self):
+		# Create widget for the command
+		layout.addWidget(QLabel('Command'),0)
+		command_edit = self.new_string(self.command)
+		command_edit.setText(self.command)
+		command_edit.selectAll()
+		layout.addWidget(command_edit)
+
+	def fill_body(self,body):
+		body = QVBoxLayout()
+		num_of_columns = int(len(self.options / 6.0) + 1)
+				
         # Create widgets for each option
 		for opt in self.options:
 			blueprint = self.parse_arg(opt[1])
@@ -104,19 +120,19 @@ class OptionInputWindow(QMainWindow):
 				except IndexError:
 					box.addWidget(self.new_double(opt))
 				body.addLayout(box)
-			else:
-				continue
+			elif blueprint[1] == '_menu_':
+				box = QHBoxLayout()
+				box.addWidget(QLabel(opt[0]))
+				opt[2] = QString('')
+				try:
+					choices = blueprint[2:]
+					box.addWidget(self.new_menu(opt,choices))
+				except IndexError:
+					box.addWidget(self.new_menu(opt))
+				body.addLayout(box)
 			opt[1] = blueprint[0]
-        
-		# Horizontal line
-		hline = QFrame()
-		hline.setFrameStyle( QFrame.HLine | QFrame.Raised )
-		hline.setLineWidth(3)
-		hline.setMidLineWidth(3)
-		body.addWidget(hline)
-        
-		#Make buttonbox
-		body.addLayout(self.buttonbox())
+			
+		return body
         
 	def parse_arg(self,raw):
 		result = raw
@@ -153,7 +169,7 @@ class OptionInputWindow(QMainWindow):
 		box = QHBoxLayout()
 		
 		qedit = QLineEdit('')
-		func = lambda: self.store_value(self.option.index(o),qedit.text())
+		func = lambda: self.store_value(self.options.index(o),qedit.text())
 		self.connect(qedit,SIGNAL("textChanged(QString)"), func)
 		browse = QPushButton('Browse')
 		browse.clicked.connect(lambda: self.select_file(qedit,ext))
@@ -182,7 +198,7 @@ class OptionInputWindow(QMainWindow):
 		box = QHBoxLayout()
 		
 		qedit = QLineEdit('')
-		func = lambda: self.store_value(self.option.index(o),qedit.text())
+		func = lambda: self.store_value(self.options.index(o),qedit.text())
 		self.connect(qedit,SIGNAL("textChanged(QString)"), func)
 		browse = QPushButton('Browse')
 		browse.clicked.connect(lambda: self.select_dir(qedit))
@@ -214,7 +230,7 @@ class OptionInputWindow(QMainWindow):
 			intspin.setMinimum(int(min))
 		if max:
 			intspin.setMaximum(int(max))
-		func = lambda: self.store_value(self.option.index(o),intspin.value())
+		func = lambda: self.store_value(self.options.index(o),intspin.value())
 		self.connect(intspin, SIGNAL("valueChanged()"), func)
 		return intspin
 		
@@ -225,12 +241,17 @@ class OptionInputWindow(QMainWindow):
 			doublespin.setMinimum(float(min))
 		if max:
 			doublespin.setMaximum(float(max))
-		func = lambda: self.store_value(self.option.index(o),doublespin.value())
+		func = lambda: self.store_value(self.options.index(o),doublespin.value())
 		self.connect(doublespin, SIGNAL("valueChanged()"), func)
 		return doublespin
         
 	def new_menu(self,o,opts=[]):
-		pass
+		menu = QComboBox()
+		for opt in opts:
+			menu.addItem(opt,0)
+		func = lambda: self.store_value(self.options.index(o),menu.currentText())
+		self.connect(menu, SIGNAL("currentIndexChanged(QString)"), func)
+		return menu
             
 	def buttonbox(self):
 		box = QHBoxLayout()

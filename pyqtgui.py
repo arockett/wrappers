@@ -29,6 +29,13 @@ class OptionInputWindow(QMainWindow):
 		self.options = options
 		apply(QWidget.__init__, (self, ) + extra)
 
+		widget = self.new_tab()
+		self.setWindowTitle("Parameter Manager")
+		self.setCentralWidget(widget)
+        
+		self.result = self.command, self.args, self.options
+		
+	def new_tab(self):
 		widget = QWidget()
 		layout = QGridLayout()
 		
@@ -44,10 +51,7 @@ class OptionInputWindow(QMainWindow):
 		layout.addLayout(self.buttonbox(),4,0)
 		
 		widget.setLayout(layout)
-		widget.setWindowTitle("Parameter Manager")
-		self.setCentralWidget(widget)
-        
-		self.result = self.command, self.args, self.options
+		return widget
         
 #****** Create GUI ******
 
@@ -58,6 +62,14 @@ class OptionInputWindow(QMainWindow):
 		hline.setLineWidth(3)
 		hline.setMidLineWidth(3)
 		return hline
+		
+	def vert_line(self):
+		# Vertical line
+		vline = QFrame()
+		vline.setFrameStyle( QFrame.VLine | QFrame.Raised )
+		vline.setLineWidth(3)
+		vline.setMidLineWidth(3)
+		return vline
 
 	def fill_command(self):
 		box = QVBoxLayout()
@@ -70,20 +82,24 @@ class OptionInputWindow(QMainWindow):
 		return box
 
 	def fill_body(self):
-		body = QVBoxLayout()
+		self.body = QHBoxLayout()
+		arg_box = QVBoxLayout()
+		boolean_box = QVBoxLayout()
+		boolean_box.addWidget(QLabel("Boolean Options"))
 		num_of_columns = int(len(self.options) / 6.0 + 1)
-				
+		
+		#for col in range(num_of_columns):
+		#	column = QVBoxLayout()	
         # Create widgets for each option
 		for opt in self.options:
 			blueprint = self.parse_arg(opt[1])
-			print blueprint
 			if len(blueprint) == 1:
 				opt[2] = False
-				body.addWidget(self.new_bool(opt))
+				boolean_box.addWidget(self.new_bool(opt))
 			elif blueprint[1] == '':
 				opt[2] = QString('')
 				widget = self.add_group(opt[0],widget=self.new_string(opt),optional=True)
-				body.addWidget(widget)
+				arg_box.addWidget(widget)
 			elif blueprint[1] == '_file_':
 				opt[2] = QString('')
 				try:
@@ -99,11 +115,11 @@ class OptionInputWindow(QMainWindow):
 					widget = self.add_group(opt[0],layout=self.new_file(opt,filetype_str),optional=True)
 				except IndexError:
 					widget = self.add_group(opt[0],layout=self.new_file(opt),optional=True)
-				body.addWidget(widget)
+				arg_box.addWidget(widget)
 			elif blueprint[1] == '_dir_':
 				opt[2] = QString()
 				widget = self.add_group(opt[0],layout=self.new_directory(opt),optional=True)
-				body.addWidget(widget)
+				arg_box.addWidget(widget)
 			elif blueprint[1] == '_int_':
 				box = QHBoxLayout()
 				box.addSpacing(15)
@@ -113,7 +129,7 @@ class OptionInputWindow(QMainWindow):
 				except IndexError:
 					box.addWidget(self.new_int(opt))
 				widget = self.add_group(opt[0],layout=box,optional=True)
-				body.addWidget(widget)
+				arg_box.addWidget(widget)
 			elif blueprint[1] == '_float_':
 				box = QHBoxLayout()
 				box.addSpacing(15)
@@ -123,7 +139,7 @@ class OptionInputWindow(QMainWindow):
 				except IndexError:
 					box.addWidget(self.new_float(opt))
 				widget = self.add_group(opt[0],layout=box,optional=True)
-				body.addWidget(widget)
+				arg_box.addWidget(widget)
 			elif blueprint[1] == '_menu_':
 				opt[2] = QString('')
 				try:
@@ -131,10 +147,14 @@ class OptionInputWindow(QMainWindow):
 					widget = self.add_group(opt[0],widget=self.new_menu(opt,choices),optional=True)
 				except IndexError:
 					widget = self.add_group(opt[0],widget=self.new_menu(opt),optional=True)
-				body.addWidget(widget)
+				arg_box.addWidget(widget)
 			opt[1] = blueprint[0]
-			
-		return body
+		
+		self.body.addLayout(arg_box)
+		self.body.addWidget(self.vert_line())
+		self.body.addLayout(boolean_box)
+		self.body.addSpacing(50)
+		return self.body
         
 	def parse_arg(self,raw):
 		result = raw
@@ -147,6 +167,7 @@ class OptionInputWindow(QMainWindow):
 	def add_group(self,name,widget=None,layout=None,optional=True):
 		group = QGroupBox(name)
 		group.setCheckable(optional)
+		group.setFlat(True)
 		if optional:
 			group.setChecked(False)
 		box = QVBoxLayout()
@@ -155,6 +176,8 @@ class OptionInputWindow(QMainWindow):
 		if layout:
 			box.addLayout(layout)
 		group.setLayout(box)
+		#self.connect(group, SIGNAL("mousePressEvent(QMouseEvent)"),
+		#			 group, SLOT("setChecked(True)"))
 		#group.toggled.connect(edit_widget)
 		return group
 		
@@ -163,6 +186,8 @@ class OptionInputWindow(QMainWindow):
 		print type(value)
 		if isinstance(value, QString):
 			self.options[index][2].swap(value)
+		elif isinstance(value, bool):
+			self.options[index][2] = bool(value)
 		else:
 			self.options[index][2] = value
         
@@ -305,9 +330,28 @@ class OptionInputWindow(QMainWindow):
 		return 1
         
 	def apply(self):
+		# Get indices in self.options of active options
+		opt_names = [opt[0] for opt in self.options]
+		indices = []
+		for box in self.body.children():
+			for i in range(box.count()):
+				witem = box.itemAt(i)
+				if isinstance(witem, QWidgetItem):
+					w = witem.widget()
+					if isinstance(w, QGroupBox):
+						if w.isChecked():
+							indices.append(opt_names.index(w.title()))
+					if isinstance(w, QCheckBox):
+						indices.append(opt_names.index(w.text()))
+		# Grab the active arguments from self.options to use in the command
 		opts = []
-		for opt in self.options:
-			opts.append([opt[0],opt[1],str(opt[2])])
+		for i in range(len(self.options)):
+			if i in indices:
+				opt = self.options[i]
+				if not isinstance(opt, bool):
+					opts.append([opt[0],opt[1],str(opt[2])])
+				else:
+					opts.append([opt[0],opt[1],opt[2]])
 		print self.command
 		print self.args
 		print opts

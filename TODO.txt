@@ -1,3 +1,8 @@
+- fix boolean options
+- add wrapping of options to save height
+- add ability to run w/o having to close
+
+
 Workflow:
 
 	user opens program

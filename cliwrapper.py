@@ -73,12 +73,16 @@ class CLIWrapper(BasicWrapper):
 def main():
     '''Open a blank CLIWrapper for editting and automatically run the command it generates.'''
     os.chdir('../chamview')
-    wrapper = CLIWrapper(command='ls',
-						 args=[('Enter Text','-l:'),
-							   ('Enter more text',':'),
-							   ('Output File','-o:_file_:Text File,*.txt'),
-                               ('Input Directory','-d:_dir_'),
-                               ('Did it work?','-s')])
+    wrapper = CLIWrapper(command='jibber-jabber',
+						 args=[('String','-l:'),
+							   ('No option, just value',':'),
+							   ('File','-o:_file_:Text File,*.txt'),
+                               ('Directory','-d:_dir_'),
+                               ('Boolean','-s'),
+                               ('Int','-i:_int_'),
+                               ('Int min/max','-I:_int_:0:19'),
+                               ('Double','-f:_double_'),
+                               ('Double min/max','F:_double_:2.5:4.5')])
     wrapper.wrap()
 
 if __name__ == '__main__':

@@ -87,9 +87,23 @@ class OptionInputWindow(QMainWindow):
 				opt[2] = QString()
 				body.addLayout(self.new_directory(opt))
 			elif blueprint[1] == '_int_':
-				continue
+				box = QHBoxLayout()
+				box.addWidget(QLabel(opt[0]))
+				try:
+					min,max = blueprint[2],blueprint[3]
+					box.addWidget(self.new_int(opt,min,max))
+				except IndexError:
+					box.addWidget(self.new_int(opt))
+				body.addLayout(box)
 			elif blueprint[1] == '_double_':
-				continue
+				box = QHBoxLayout()
+				box.addWidget(QLabel(opt[0]))
+				try:
+					min,max = blueprint[2],blueprint[3]
+					box.addWidget(self.new_double(opt,min,max))
+				except IndexError:
+					box.addWidget(self.new_double(opt))
+				body.addLayout(box)
 			else:
 				continue
 			opt[1] = blueprint[0]
@@ -195,10 +209,25 @@ class OptionInputWindow(QMainWindow):
 			ledit.setText(path)
 			
 	def new_int(self,o,min=None,max=None):
-		pass
+		intspin = QSpinBox()
+		if min:
+			intspin.setMinimum(int(min))
+		if max:
+			intspin.setMaximum(int(max))
+		func = lambda: self.store_value(self.option.index(o),intspin.value())
+		self.connect(intspin, SIGNAL("valueChanged()"), func)
+		return intspin
+		
         
 	def new_double(self,o,min=None,max=None):
-		pass
+		doublespin = QDoubleSpinBox()
+		if min:
+			doublespin.setMinimum(float(min))
+		if max:
+			doublespin.setMaximum(float(max))
+		func = lambda: self.store_value(self.option.index(o),doublespin.value())
+		self.connect(doublespin, SIGNAL("valueChanged()"), func)
+		return doublespin
         
 	def new_menu(self,o,opts=[]):
 		pass

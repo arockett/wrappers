@@ -81,8 +81,8 @@ def main():
                                ('Boolean','-s'),
                                ('Int','-i:_int_'),
                                ('Int min/max','-I:_int_:0:19'),
-                               ('Double','-f:_double_'),
-                               ('Double min/max','F:_double_:2.5:4.5'),
+                               ('Float','-f:_float_'),
+                               ('Float min/max','F:_float_:2.5:4.5'),
                                ('Menu','-m:_menu_:One:Two:Three')])
     wrapper.wrap()
 

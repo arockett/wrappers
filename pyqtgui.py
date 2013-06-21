@@ -106,19 +106,19 @@ class OptionInputWindow(QMainWindow):
 				box = QHBoxLayout()
 				box.addWidget(QLabel(opt[0]))
 				try:
-					min,max = blueprint[2],blueprint[3]
-					box.addWidget(self.new_int(opt,min,max))
+					min_,max_,step = blueprint[2],blueprint[3],blueprint[4]
+					box.addWidget(self.new_int(opt,min_,max_))
 				except IndexError:
 					box.addWidget(self.new_int(opt))
 				body.addLayout(box)
-			elif blueprint[1] == '_double_':
+			elif blueprint[1] == '_float_':
 				box = QHBoxLayout()
 				box.addWidget(QLabel(opt[0]))
 				try:
-					min,max = blueprint[2],blueprint[3]
-					box.addWidget(self.new_double(opt,min,max))
+					min_,max_,step = blueprint[2],blueprint[3],blueprint[4]
+					box.addWidget(self.new_float(opt,min_,max_))
 				except IndexError:
-					box.addWidget(self.new_double(opt))
+					box.addWidget(self.new_float(opt))
 				body.addLayout(box)
 			elif blueprint[1] == '_menu_':
 				box = QHBoxLayout()
@@ -224,23 +224,25 @@ class OptionInputWindow(QMainWindow):
 			
 			ledit.setText(path)
 			
-	def new_int(self,o,min=None,max=None):
+	def new_int(self,o,min_=None,max_=None,step=1):
 		intspin = QSpinBox()
-		if min:
-			intspin.setMinimum(int(min))
-		if max:
-			intspin.setMaximum(int(max))
+		if min_:
+			intspin.setMinimum(int(min_))
+		if max_:
+			intspin.setMaximum(int(max_))
+		intspin.setSingleStep(int(step))
 		func = lambda: self.store_value(self.options.index(o),intspin.value())
 		self.connect(intspin, SIGNAL("valueChanged()"), func)
 		return intspin
 		
         
-	def new_double(self,o,min=None,max=None):
+	def new_float(self,o,min_=None,max_=None,step=0.1):
 		doublespin = QDoubleSpinBox()
-		if min:
-			doublespin.setMinimum(float(min))
-		if max:
-			doublespin.setMaximum(float(max))
+		if min_:
+			doublespin.setMinimum(float(min_))
+		if max_:
+			doublespin.setMaximum(float(max_))
+		doublespin.setSingleStep(float(step))
 		func = lambda: self.store_value(self.options.index(o),doublespin.value())
 		self.connect(doublespin, SIGNAL("valueChanged()"), func)
 		return doublespin

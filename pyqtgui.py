@@ -345,23 +345,21 @@ class OptionInputWindow(QMainWindow):
 		# Get indices in self.options of active options
 		opt_names = [opt[0] for opt in self.options]
 		indices = []
-		for box in self.body.children():
-			print box
-			for i in range(box.count()):
-				witem = box.itemAt(i)
-				print witem
-				if isinstance(witem, QWidgetItem):
-					w = witem.widget()
-					#print w
-					if isinstance(w, QCheckBox):
-						indices.append(opt_names.index(w.text()))
-					elif isinstance(w, QFrame):
-						for widget in w.children():
-							#print widget
-							pass
-					if isinstance(w, QGroupBox):
-						if w.isChecked():
-							indices.append(opt_names.index(w.title()))
+		for box in self.body.children():		# arg_box and boolean_box
+			for i in range(box.count()):		# column in arg_box, check boxes in bool_box
+				item = box.itemAt(i)
+				if isinstance(item, QWidgetItem):	# get indices of check boxes in bool_box
+					widget = item.widget()
+					if isinstance(widget, QCheckBox):
+						indices.append(opt_names.index(widget.text()))
+				elif isinstance(item, QVBoxLayout):	# search through columns
+					for i in range(item.count()):
+						widget = item.itemAt(i)
+						if isinstance(widget, QWidgetItem):	# get indices of active groups
+							widget = widget.widget()
+							if widget.isChecked():
+								indices.append(opt_names.index(widget.title()))
+								
 		# Grab the active arguments from self.options to use in the command
 		opts = []
 		for i in range(len(self.options)):

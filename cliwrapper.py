@@ -73,13 +73,13 @@ def main():
     os.chdir('../chamview')
     wrapper = CLIWrapper(command='jibber-jabber',
 						 args=[('String','-l:'),
-							   #('No option, just value',':'),
+							   ('No option, just value',':'),
 							   ('File','-o:_file_:Text File,*.txt'),
                                ('Directory','-d:_dir_'),
                                ('Boolean','-s'),
-                               #('Int','-i:_int_'),
+                               ('Int','-i:_int_'),
                                ('Int min/max','-I:_int_:0:19'),
-                               #('Float','-f:_float_'),
+                               ('Float','-f:_float_'),
                                ('Float min/max','-F:_float_:2.5:4.5'),
                                ('Menu','-m:_menu_:One:Two:Three')])
     wrapper.wrap()

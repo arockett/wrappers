@@ -83,23 +83,28 @@ class OptionInputWindow(QMainWindow):
 
 	def fill_body(self):
 		self.body = QHBoxLayout()
-		arg_box = QVBoxLayout()
+		arg_box = QHBoxLayout()
 		boolean_box = QVBoxLayout()
 		boolean_box.addWidget(QLabel("Boolean Options"))
 		num_of_columns = int(len(self.options) / 6.0 + 1)
 		
-		#for col in range(num_of_columns):
-		#	column = QVBoxLayout()	
-        # Create widgets for each option
+		columns = []
+		for i in range(num_of_columns):
+			columns.append(QVBoxLayout())	
+		# Create widgets for each option
+		num = -1    # use to track which column to add the widget to
 		for opt in self.options:
+			num += 1
+			index = int(num / 6.0)
 			blueprint = self.parse_arg(opt[1])
 			if len(blueprint) == 1:
 				opt[2] = False
 				boolean_box.addWidget(self.new_bool(opt))
+				num -= 1
 			elif blueprint[1] == '':
 				opt[2] = QString('')
 				widget = self.add_group(opt[0],widget=self.new_string(opt),optional=True)
-				arg_box.addWidget(widget)
+				columns[index].addWidget(widget)
 			elif blueprint[1] == '_file_':
 				opt[2] = QString('')
 				try:
@@ -115,11 +120,11 @@ class OptionInputWindow(QMainWindow):
 					widget = self.add_group(opt[0],layout=self.new_file(opt,filetype_str),optional=True)
 				except IndexError:
 					widget = self.add_group(opt[0],layout=self.new_file(opt),optional=True)
-				arg_box.addWidget(widget)
+				columns[index].addWidget(widget)
 			elif blueprint[1] == '_dir_':
 				opt[2] = QString()
 				widget = self.add_group(opt[0],layout=self.new_directory(opt),optional=True)
-				arg_box.addWidget(widget)
+				columns[index].addWidget(widget)
 			elif blueprint[1] == '_int_':
 				box = QHBoxLayout()
 				box.addSpacing(15)
@@ -129,7 +134,7 @@ class OptionInputWindow(QMainWindow):
 				except IndexError:
 					box.addWidget(self.new_int(opt))
 				widget = self.add_group(opt[0],layout=box,optional=True)
-				arg_box.addWidget(widget)
+				columns[index].addWidget(widget)
 			elif blueprint[1] == '_float_':
 				box = QHBoxLayout()
 				box.addSpacing(15)
@@ -139,7 +144,7 @@ class OptionInputWindow(QMainWindow):
 				except IndexError:
 					box.addWidget(self.new_float(opt))
 				widget = self.add_group(opt[0],layout=box,optional=True)
-				arg_box.addWidget(widget)
+				columns[index].addWidget(widget)
 			elif blueprint[1] == '_menu_':
 				opt[2] = QString('')
 				try:
@@ -147,11 +152,18 @@ class OptionInputWindow(QMainWindow):
 					widget = self.add_group(opt[0],widget=self.new_menu(opt,choices),optional=True)
 				except IndexError:
 					widget = self.add_group(opt[0],widget=self.new_menu(opt),optional=True)
-				arg_box.addWidget(widget)
+				columns[index].addWidget(widget)
 			opt[1] = blueprint[0]
 		
+		# Make partially filled Boxes look nicer
+		columns[-1].addStretch()
+		boolean_box.addStretch()
+		# Fill arg_box with the columns
+		for col in columns:
+			arg_box.addLayout(col)
+			arg_box.addWidget(self.vert_line())
+		
 		self.body.addLayout(arg_box)
-		self.body.addWidget(self.vert_line())
 		self.body.addLayout(boolean_box)
 		self.body.addSpacing(50)
 		return self.body
@@ -334,15 +346,22 @@ class OptionInputWindow(QMainWindow):
 		opt_names = [opt[0] for opt in self.options]
 		indices = []
 		for box in self.body.children():
+			print box
 			for i in range(box.count()):
 				witem = box.itemAt(i)
+				print witem
 				if isinstance(witem, QWidgetItem):
 					w = witem.widget()
+					#print w
+					if isinstance(w, QCheckBox):
+						indices.append(opt_names.index(w.text()))
+					elif isinstance(w, QFrame):
+						for widget in w.children():
+							#print widget
+							pass
 					if isinstance(w, QGroupBox):
 						if w.isChecked():
 							indices.append(opt_names.index(w.title()))
-					if isinstance(w, QCheckBox):
-						indices.append(opt_names.index(w.text()))
 		# Grab the active arguments from self.options to use in the command
 		opts = []
 		for i in range(len(self.options)):

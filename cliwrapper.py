@@ -36,20 +36,6 @@ class CLIWrapper(BasicWrapper):
 
     def get_options(self):
         '''Use an OptionInputGui to get all necessary options.'''
-        class guiThread(QThread):
-            def __init__(self, command, args, options):
-                QThread.__init__(self)
-                self.win = OptionInputWindow(command,args,options)
-                #parent.connect(self.win, SIGNAL("argumentsEdited()"), self.signal)
-                obj = QObject()
-                obj.connect(self.win, SIGNAL("argumentsEdited()"), self.signal)
-
-            def signal(self):
-                self.result = self.win.result
-                self.emit(SIGNAL("readyToRun()"))
-
-            def run(self):
-                self.win.show()
 
         app = QApplication(sys.argv)
         app.connect(app, SIGNAL("lastWindowClosed()"),
@@ -62,13 +48,9 @@ class CLIWrapper(BasicWrapper):
             else:
                 print 'bad options'
 
-        #gstring = guiThread(self.base_command, self.args, self.options)
-        #app.connect(gstring, SIGNAL("readyToRun()"), run)
-
         self.win = OptionInputWindow(self.base_command, self.args, self.options)
-        app.connect(self.win, SIGNAL("argumentsEdited()"), run)
+        app.connect(self.win, SIGNAL("readyToRun()"), run)
 
-        #gstring.start()
         self.win.show()
         app.exec_()
 

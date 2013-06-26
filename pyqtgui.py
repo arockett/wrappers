@@ -364,6 +364,6 @@ class OptionInputWindow(QMainWindow):
         print self.args
         print opts
         self.result = str(self.command), self.args, opts
-        self.emit(SIGNAL("argumentsEdited()"))
+        self.emit(SIGNAL("readyToRun()"))
 
 

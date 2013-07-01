@@ -75,8 +75,8 @@ class OptionInputWindow(QMainWindow):
     def fill_body(self):
         self.body = QHBoxLayout()
         arg_box = QHBoxLayout()
-        boolean_box = QVBoxLayout()
-        boolean_box.addWidget(QLabel("Boolean Options"))
+        #boolean_box = QVBoxLayout()
+        #boolean_box.addWidget(QLabel("Boolean Options"))
         num_of_columns = int(len(self.options) / 6.0 + 1)
 
         columns = []
@@ -90,8 +90,8 @@ class OptionInputWindow(QMainWindow):
             blueprint = self.parse_arg(opt[1])
             if len(blueprint) == 1:
                 opt[2] = False
-                boolean_box.addWidget(self.new_bool(opt))
-                num -= 1
+                columns[index].addWidget(self.new_bool(opt))
+                #num -= 1
             elif blueprint[1] == '':
                 opt[2] = QString('')
                 widget = self.add_group(opt[0],widget=self.new_string(opt),optional=True)
@@ -148,15 +148,15 @@ class OptionInputWindow(QMainWindow):
 
         # Make partially filled Boxes look nicer
         columns[-1].addStretch()
-        boolean_box.addStretch()
+        #boolean_box.addStretch()
         # Fill arg_box with the columns
         for col in columns:
             arg_box.addLayout(col)
             arg_box.addWidget(self.vert_line())
 
         self.body.addLayout(arg_box)
-        self.body.addLayout(boolean_box)
-        self.body.addSpacing(50)
+        #self.body.addLayout(boolean_box)
+        #self.body.addSpacing(50)
         return self.body
 
     def parse_arg(self,raw):
@@ -189,8 +189,6 @@ class OptionInputWindow(QMainWindow):
         print type(value)
         if isinstance(value, QString):
             self.options[index][2].swap(value)
-        elif isinstance(value, bool):
-            self.options[index][2] = bool(value)
         else:
             self.options[index][2] = value
 
@@ -336,18 +334,18 @@ class OptionInputWindow(QMainWindow):
         # Get indices in self.options of active options
         opt_names = [opt[0] for opt in self.options]
         indices = []
-        for box in self.body.children():        # arg_box and boolean_box
-            for i in range(box.count()):        # column in arg_box, check boxes in bool_box
+        for box in self.body.children():      # arg_box and boolean_box
+            print box
+            for i in range(box.count()):      # column in arg_box, check boxes in bool_box
                 item = box.itemAt(i)
-                if isinstance(item, QWidgetItem):   # get indices of check boxes in bool_box
-                    widget = item.widget()
-                    if isinstance(widget, QCheckBox):
-                        indices.append(opt_names.index(widget.text()))
-                elif isinstance(item, QVBoxLayout): # search through columns
-                    for i in range(item.count()):
-                        widget = item.itemAt(i)
-                        if isinstance(widget, QWidgetItem): # get indices of active groups
-                            widget = widget.widget()
+                print item
+                if isinstance(item, QVBoxLayout):
+                    for i in range(item.count()): # search through columns
+                        widget = item.itemAt(i).widget()
+                        print widget
+                        if isinstance(widget, QCheckBox):   # get indices of check boxes in bool_box
+                            indices.append(opt_names.index(widget.text()))
+                        elif isinstance(widget, QGroupBox): # get indices of active groups
                             if widget.isChecked():
                                 indices.append(opt_names.index(widget.title()))
 
@@ -356,7 +354,7 @@ class OptionInputWindow(QMainWindow):
         for i in range(len(self.options)):
             if i in indices:
                 opt = self.options[i]
-                if not isinstance(opt, bool):
+                if not isinstance(opt[2], bool):
                     opts.append([opt[0],opt[1],str(opt[2])])
                 else:
                     opts.append([opt[0],opt[1],opt[2]])

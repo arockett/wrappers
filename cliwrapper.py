@@ -7,7 +7,7 @@
 #
 '''Module for graphically managing command line options for a given command.'''
 
-import os, sys, time
+import os, sys
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from Wrapper import BasicWrapper
@@ -41,7 +41,7 @@ class CLIWrapper(BasicWrapper):
         app.connect(app, SIGNAL("lastWindowClosed()"),
                     app, SLOT("quit()"))
 
-        def run(self):
+        def run():
             if self.isvalid(self.win.result):
                 self.base_command,self.args,self.options = self.win.result
                 self.run_command()

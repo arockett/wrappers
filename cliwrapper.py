@@ -27,7 +27,7 @@ class CLIWrapper(BasicWrapper):
         self.args = [(name.strip(),rep.strip()) for name,rep in args]
         self.options = []
         for arg in self.args:
-            self.options.append([arg[0],arg[1],''])
+            self.options.append([arg[0],arg[1].split(':')[0],''])
 
         self.build_command()
 
@@ -43,29 +43,33 @@ class CLIWrapper(BasicWrapper):
 
         def run():
             if self.isvalid(self.win.result):
-                self.base_command,self.args,self.options = self.win.result
-                self.run_command()
+                self.base_command, self.args, self.options = self.win.result
+                self.run_command(self.base_command, self.options)
             else:
                 print 'bad options'
 
         self.win = OptionInputWindow(self.base_command, self.args, self.options)
         app.connect(self.win, SIGNAL("readyToRun()"), run)
+        save = lambda (cm,arg,op)=self.win.result: self.save_options(cm,arg,op)
+        app.connect(self.win, SIGNAL("readyToSave()"), save)
 
         self.win.show()
         app.exec_()
 
         sys.exit(0)
 
-    def run_command(self):
+    def run_command(self,cmd,opts):
         '''Run the command built from the OptionInputGui results.'''
-        self.build_command()
+        self.build_command(cmd,opts)
         print self.command
         BasicWrapper.run_command(self)
 
-    def build_command(self):
+    def build_command(self,cmd=None,opts=None):
+        if not cmd: cmd = self.base_command
+        if not opts: opts = self.options
         self.command = ''
-        self.command += self.base_command
-        for name,arg,value in self.options:
+        self.command += cmd
+        for name,arg,value in opts:
             if value:
                 self.command += ' '+arg
                 if not isinstance(value,bool):
@@ -76,10 +80,13 @@ class CLIWrapper(BasicWrapper):
 
 #****** Manage Options ******
 
-    def save_options(self):
-        pass
+    def save_options(self,cmd,args,opts):
+        print 'SAVE'
+        print cmd
+        print args
+        print opts
 
-    def open_options(self):
+    def open_options(self,previous_opts_file):
         pass
 
     def compare_options(self,previous_opts_file):
@@ -94,8 +101,8 @@ def main():
                          args=[('String','-l:'),
                                ('No option, just value',':'),
                                ('File','-o:_file_:Text File,*.txt'),
-                               ('Directory','-d:_dir_'),
-                               ('Boolean','-s'),
+                               ('Directory','-d:_dir_|*'),
+                               ('Boolean','-s|*'),
                                ('Int','-i:_int_'),
                                ('Int min/max','-I:_int_:0:19'),
                                ('Float','-f:_float_'),

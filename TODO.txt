@@ -1,7 +1,7 @@
-- fix boolean options
-- add wrapping of options to save height
-- add ability to run w/o having to close
-
+- add save/save as feature
+- add open feature
+- add compare feature
+- implement tab and top menu widget structure
 
 Workflow:
 
@@ -23,4 +23,6 @@ args in init:
 	- '-o:_menu_:arg1:arg2 	    arg can be any of the following comma separated args but nothing else
 	- '-o:_int_:min:max:step'   takes an integer arg between min and max (use * to unbound one or the other)
 	- '-o:_float_:min:max:step' takes a float arg between min and max (use * to unbound one or the other)
-	
+	- add '|*' to the end of any representation to make it a required field
+		ex: '-o:_dir_|*'
+	  	ex: '-o|*'

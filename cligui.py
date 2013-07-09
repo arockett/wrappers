@@ -370,10 +370,16 @@ class OptionInputWindow(QMainWindow):
 
         def check_option(widg):
             if isinstance(widg, QCheckBox):   # get indices of check boxes in bool_box
-                indices.append(opt_names.index(widg.text()))
+                try:
+                    indices.append(opt_names.index(widg.text()))
+                except ValueError:
+                    pass
             elif isinstance(widg, QGroupBox): # get indices of active groups
                 if widg.isChecked():
-                    indices.append(opt_names.index(widg.title()))
+                    try:
+                        indices.append(opt_names.index(widg.title()))
+                    except ValueError:
+                        pass
             else:
                 return False
 

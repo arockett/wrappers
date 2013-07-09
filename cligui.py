@@ -368,16 +368,26 @@ class OptionInputWindow(QMainWindow):
         for name in self.required:
             indices.append(opt_names.index(name))
 
-        def check_option(widg):
-            if isinstance(widg, QCheckBox):   # get indices of check boxes in bool_box
+        def check_option(frame):
+            try:
+                widget = frame.widget()
+            except:
+                return False
+            if isinstance(widget, QCheckBox):   # get indices of check boxes in bool_box
+                print frame
+                print widget
+                print widget.text()
                 try:
-                    indices.append(opt_names.index(widg.text()))
+                    indices.append(opt_names.index(widget.text()))
                 except ValueError:
                     pass
-            elif isinstance(widg, QGroupBox): # get indices of active groups
-                if widg.isChecked():
+            elif isinstance(widget, QGroupBox): # get indices of active groups
+                print frame
+                print widget
+                print widget.title()
+                if widget.isChecked():
                     try:
-                        indices.append(opt_names.index(widg.title()))
+                        indices.append(opt_names.index(widget.title()))
                     except ValueError:
                         pass
             else:
@@ -385,15 +395,20 @@ class OptionInputWindow(QMainWindow):
 
             return True
 
-        for box in self.body.children():      # arg_box
-            if check_option(box): continue
-            for i in range(box.count()):      # column in arg_box, check boxes in bool_box
-                item = box.itemAt(i)
-                if check_option(item): continue
-                if isinstance(item, QLayout):
-                    for i in range(item.count()): # search through layouts
-                        widget = item.itemAt(i).widget()
-                        if check_option(widget): continue
+        for layer1 in self.body.children():      # arg_box
+            if check_option(layer1): continue
+            if isinstance(layer1, QLayout):
+                for i in range(layer1.count()):      # column in arg_box
+                    layer2 = layer1.itemAt(i)
+                    if check_option(layer2): continue
+                    if isinstance(layer2, QLayout):
+                        for i in range(layer2.count()): # search through layouts
+                            layer3 = layer2.itemAt(i)
+                            if check_option(layer3): continue
+                            if isinstance(layer3, QLayout):
+                                for i in range(layer3.count()):
+                                    layer4 = layer3.itemAt(i)
+                                    if check_option(layer4): continue
 
         # Grab the active arguments from self.options to use in the command
         opts = []

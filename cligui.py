@@ -91,7 +91,8 @@ class OptionInputWindow(QMainWindow):
             index = int(num / 6.0)
             i = arg_names.index(opt[0])
             blueprint, required = self.parse_arg(self.args[i][1])
-            self.add_option(blueprint, required, opt, columns[index])
+            widg = self.make_widget(blueprint, required, opt)
+            columns[index].addWidget(widg)
 
         # Make partially filled Boxes look nicer
         columns[-1].addStretch()
@@ -103,16 +104,15 @@ class OptionInputWindow(QMainWindow):
         self.body.addLayout(arg_box)
         return self.body
 
-    def add_option(self, blueprint, req, opt, layout):
+    def make_widget(self, blueprint, req, opt):
         if len(blueprint) == 1:
             opt[2] = False
             check = not req
-            layout.addWidget(self.new_bool(opt,check))
+            widget = self.new_bool(opt,check)
             #num -= 1
         elif blueprint[1] == '':
             opt[2] = QString('')
             widget = self.add_group(opt[0],widget=self.new_string(opt),optional=req)
-            layout.addWidget(widget)
         elif blueprint[1] == '_file_':
             opt[2] = QString('')
             try:
@@ -128,11 +128,9 @@ class OptionInputWindow(QMainWindow):
                 widget = self.add_group(opt[0],layout=self.new_file(opt,filetype_str),optional=req)
             except IndexError:
                 widget = self.add_group(opt[0],layout=self.new_file(opt),optional=req)
-            layout.addWidget(widget)
         elif blueprint[1] == '_dir_':
             opt[2] = QString()
             widget = self.add_group(opt[0],layout=self.new_directory(opt),optional=req)
-            layout.addWidget(widget)
         elif blueprint[1] == '_int_':
             box = QHBoxLayout()
             box.addSpacing(15)
@@ -142,7 +140,6 @@ class OptionInputWindow(QMainWindow):
             except IndexError:
                 box.addWidget(self.new_int(opt))
             widget = self.add_group(opt[0],layout=box,optional=req)
-            layout.addWidget(widget)
         elif blueprint[1] == '_float_':
             box = QHBoxLayout()
             box.addSpacing(15)
@@ -152,7 +149,6 @@ class OptionInputWindow(QMainWindow):
             except IndexError:
                 box.addWidget(self.new_float(opt))
             widget = self.add_group(opt[0],layout=box,optional=req)
-            layout.addWidget(widget)
         elif blueprint[1] == '_menu_':
             opt[2] = QString('')
             try:
@@ -160,7 +156,8 @@ class OptionInputWindow(QMainWindow):
                 widget = self.add_group(opt[0],widget=self.new_menu(opt,choices),optional=req)
             except IndexError:
                 widget = self.add_group(opt[0],widget=self.new_menu(opt),optional=req)
-            layout.addWidget(widget)
+
+        return widget
 
     def parse_arg(self,raw):
         if raw[-2:] == '|*':

@@ -97,6 +97,7 @@ class OptionInputWindow(QMainWindow):
         # Make partially filled Boxes look nicer
         columns[-1].addStretch()
         # Fill arg_box with the columns
+        arg_box.addWidget(self.vert_line())
         for col in columns:
             arg_box.addLayout(col)
             arg_box.addWidget(self.vert_line())

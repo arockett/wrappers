@@ -47,7 +47,8 @@ class ChamviewWindow(OptionInputWindow):
             if opt[0] == 'Image Directory': continue
             i = arg_names.index(opt[0])
             blueprint, required = self.parse_arg(self.args[i][1])
-            self.add_option(blueprint, required, opt, arg_box)
+            widget = self.make_widget(blueprint, required, opt)
+            arg_box.addWidget(widget)
 
         # Pack self.body
         frame_grab_box.addStretch()

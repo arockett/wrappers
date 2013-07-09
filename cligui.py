@@ -76,8 +76,6 @@ class OptionInputWindow(QMainWindow):
     def fill_body(self):
         self.body = QHBoxLayout()
         arg_box = QHBoxLayout()
-        #boolean_box = QVBoxLayout()
-        #boolean_box.addWidget(QLabel("Boolean Options"))
         num_of_columns = int(len(self.options) / 6.0 + 1)
         if len(self.options) % 6 == 0:
             num_of_columns -= 1
@@ -92,77 +90,77 @@ class OptionInputWindow(QMainWindow):
             num += 1
             index = int(num / 6.0)
             i = arg_names.index(opt[0])
-            blueprint, req = self.parse_arg(self.args[i][1])
-            if len(blueprint) == 1:
-                opt[2] = False
-                check = not req
-                columns[index].addWidget(self.new_bool(opt,check))
-                #num -= 1
-            elif blueprint[1] == '':
-                opt[2] = QString('')
-                widget = self.add_group(opt[0],widget=self.new_string(opt),optional=req)
-                columns[index].addWidget(widget)
-            elif blueprint[1] == '_file_':
-                opt[2] = QString('')
-                try:
-                    filetypes = [tuple(ft.split(',')) for ft in blueprint[2:]]
-                    filetype_str = ''
-                    for typ in filetypes:
-                        filetype_str += typ[0]+' ('
-                        for ext in typ[1:]:
-                            filetype_str += ext + ' '
-                        filetype_str = filetype_str[:-1] + ')'
-                        filetype_str += ';;'
-                    filetype_str = filetype_str[:-2]
-                    widget = self.add_group(opt[0],layout=self.new_file(opt,filetype_str),optional=req)
-                except IndexError:
-                    widget = self.add_group(opt[0],layout=self.new_file(opt),optional=req)
-                columns[index].addWidget(widget)
-            elif blueprint[1] == '_dir_':
-                opt[2] = QString()
-                widget = self.add_group(opt[0],layout=self.new_directory(opt),optional=req)
-                columns[index].addWidget(widget)
-            elif blueprint[1] == '_int_':
-                box = QHBoxLayout()
-                box.addSpacing(15)
-                try:
-                    min_,max_,step = blueprint[2],blueprint[3],blueprint[4]
-                    box.addWidget(self.new_int(opt,min_,max_))
-                except IndexError:
-                    box.addWidget(self.new_int(opt))
-                widget = self.add_group(opt[0],layout=box,optional=req)
-                columns[index].addWidget(widget)
-            elif blueprint[1] == '_float_':
-                box = QHBoxLayout()
-                box.addSpacing(15)
-                try:
-                    min_,max_,step = blueprint[2],blueprint[3],blueprint[4]
-                    box.addWidget(self.new_float(opt,min_,max_))
-                except IndexError:
-                    box.addWidget(self.new_float(opt))
-                widget = self.add_group(opt[0],layout=box,optional=req)
-                columns[index].addWidget(widget)
-            elif blueprint[1] == '_menu_':
-                opt[2] = QString('')
-                try:
-                    choices = blueprint[2:]
-                    widget = self.add_group(opt[0],widget=self.new_menu(opt,choices),optional=req)
-                except IndexError:
-                    widget = self.add_group(opt[0],widget=self.new_menu(opt),optional=req)
-                columns[index].addWidget(widget)
+            blueprint, required = self.parse_arg(self.args[i][1])
+            self.add_option(blueprint, required, opt, columns[index])
 
         # Make partially filled Boxes look nicer
         columns[-1].addStretch()
-        #boolean_box.addStretch()
         # Fill arg_box with the columns
         for col in columns:
             arg_box.addLayout(col)
             arg_box.addWidget(self.vert_line())
 
         self.body.addLayout(arg_box)
-        #self.body.addLayout(boolean_box)
-        #self.body.addSpacing(50)
         return self.body
+
+    def add_option(self, blueprint, req, opt, layout):
+        if len(blueprint) == 1:
+            opt[2] = False
+            check = not req
+            layout.addWidget(self.new_bool(opt,check))
+            #num -= 1
+        elif blueprint[1] == '':
+            opt[2] = QString('')
+            widget = self.add_group(opt[0],widget=self.new_string(opt),optional=req)
+            layout.addWidget(widget)
+        elif blueprint[1] == '_file_':
+            opt[2] = QString('')
+            try:
+                filetypes = [tuple(ft.split(',')) for ft in blueprint[2:]]
+                filetype_str = ''
+                for typ in filetypes:
+                    filetype_str += typ[0]+' ('
+                    for ext in typ[1:]:
+                        filetype_str += ext + ' '
+                    filetype_str = filetype_str[:-1] + ')'
+                    filetype_str += ';;'
+                filetype_str = filetype_str[:-2]
+                widget = self.add_group(opt[0],layout=self.new_file(opt,filetype_str),optional=req)
+            except IndexError:
+                widget = self.add_group(opt[0],layout=self.new_file(opt),optional=req)
+            layout.addWidget(widget)
+        elif blueprint[1] == '_dir_':
+            opt[2] = QString()
+            widget = self.add_group(opt[0],layout=self.new_directory(opt),optional=req)
+            layout.addWidget(widget)
+        elif blueprint[1] == '_int_':
+            box = QHBoxLayout()
+            box.addSpacing(15)
+            try:
+                min_,max_,step = blueprint[2],blueprint[3],blueprint[4]
+                box.addWidget(self.new_int(opt,min_,max_))
+            except IndexError:
+                box.addWidget(self.new_int(opt))
+            widget = self.add_group(opt[0],layout=box,optional=req)
+            layout.addWidget(widget)
+        elif blueprint[1] == '_float_':
+            box = QHBoxLayout()
+            box.addSpacing(15)
+            try:
+                min_,max_,step = blueprint[2],blueprint[3],blueprint[4]
+                box.addWidget(self.new_float(opt,min_,max_))
+            except IndexError:
+                box.addWidget(self.new_float(opt))
+            widget = self.add_group(opt[0],layout=box,optional=req)
+            layout.addWidget(widget)
+        elif blueprint[1] == '_menu_':
+            opt[2] = QString('')
+            try:
+                choices = blueprint[2:]
+                widget = self.add_group(opt[0],widget=self.new_menu(opt,choices),optional=req)
+            except IndexError:
+                widget = self.add_group(opt[0],widget=self.new_menu(opt),optional=req)
+            layout.addWidget(widget)
 
     def parse_arg(self,raw):
         if raw[-2:] == '|*':
@@ -206,6 +204,8 @@ class OptionInputWindow(QMainWindow):
     def new_bool(self,obj,checked=False):
         checkbox = QCheckBox(obj[0])
         if checked:
+            i = self.options.index(obj)
+            self.options[i][2] = True
             checkbox.setChecked(checked)
             checkbox.stateChanged.connect(lambda: checkbox.setCheckState(2))
         else:
@@ -367,20 +367,27 @@ class OptionInputWindow(QMainWindow):
         indices = []
         for name in self.required:
             indices.append(opt_names.index(name))
-        for box in self.body.children():      # arg_box and boolean_box
-            print box
+
+        def check_option(widg):
+            if isinstance(widg, QCheckBox):   # get indices of check boxes in bool_box
+                indices.append(opt_names.index(widg.text()))
+            elif isinstance(widg, QGroupBox): # get indices of active groups
+                if widg.isChecked():
+                    indices.append(opt_names.index(widg.title()))
+            else:
+                return False
+
+            return True
+
+        for box in self.body.children():      # arg_box
+            if check_option(box): continue
             for i in range(box.count()):      # column in arg_box, check boxes in bool_box
                 item = box.itemAt(i)
-                print item
-                if isinstance(item, QVBoxLayout):
-                    for i in range(item.count()): # search through columns
+                if check_option(item): continue
+                if isinstance(item, QLayout):
+                    for i in range(item.count()): # search through layouts
                         widget = item.itemAt(i).widget()
-                        print widget
-                        if isinstance(widget, QCheckBox):   # get indices of check boxes in bool_box
-                            indices.append(opt_names.index(widget.text()))
-                        elif isinstance(widget, QGroupBox): # get indices of active groups
-                            if widget.isChecked():
-                                indices.append(opt_names.index(widget.title()))
+                        if check_option(widget): continue
 
         # Grab the active arguments from self.options to use in the command
         opts = []

@@ -25,20 +25,36 @@ class ChamviewWrapper(CLIWrapper):
                 ('System Info File', '-w:_file_:Text File,*.txt')]
         CLIWrapper.__init__(self, command, args)
 
-    #def create_window(self):
-    #    return ChamviewWindow(self.base_command, self.args, self.options)
+    def create_window(self):
+        return ChamviewWindow(self.base_command, self.args, self.options)
 
 class ChamviewWindow(OptionInputWindow):
 
-    #def fill_command(self):
-    #    pass
+    def fill_command(self):
+        return QVBoxLayout()
 
     def fill_body(self):
-        OptionInputWindow.fill_body(self)
+        # Create boxes to add Widgets to
+        self.body = QHBoxLayout()
+        arg_box = QVBoxLayout()
+        frame_grab_box = QVBoxLayout()
 
-    # Might not need to override this func, we'll see
-    #def apply(self):
-    #    pass
+        # Add Image Directory widget w/ frame grab potential
+
+        # Add all other widgets
+        arg_names = [x[0] for x in self.args]
+        for opt in self.options:
+            if opt[0] == 'Image Directory': continue
+            i = arg_names.index(opt[0])
+            blueprint, required = self.parse_arg(self.args[i][1])
+            self.add_option(blueprint, required, opt, arg_box)
+
+        # Pack self.body
+        frame_grab_box.addStretch()
+        self.body.addLayout(arg_box)
+        self.body.addWidget(self.vert_line())
+        self.body.addLayout(frame_grab_box)
+        return self.body
 
 
 def main():

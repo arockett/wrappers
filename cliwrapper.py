@@ -27,7 +27,12 @@ class CLIWrapper(BasicWrapper):
         self.args = [(name.strip(),rep.strip()) for name,rep in args]
         self.options = []
         for arg in self.args:
-            self.options.append([arg[0],arg[1].split(':')[0],''])
+            name = arg[0]
+            flag = arg[1].split(':')[0]
+            if flag[-2:] == '|*':
+                flag = flag[:-2]
+            value = ''
+            self.options.append([name,flag,value])
 
         self.build_command()
 

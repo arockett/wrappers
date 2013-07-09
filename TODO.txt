@@ -17,7 +17,7 @@ args in init:
 - option representation used to specify option type
 	- '-o'			    stand-alone option -o takes no argument
 	- '-o:'			    takes a string argument
-	- '-o:_file_:typ1:typ2'     takes file path argument w/ optional types separated by :
+	- '-o:_file_:typ1:typ2'     takes file path argument w/ optional types separated by ':'
 					ex: '-o:_file_:Text File,*.txt:Image File,*.png,*.mpg,*.jpg'
 	- '-o:_dir_'		    takes a directory path argument
 	- '-o:_menu_:arg1:arg2 	    arg can be any of the following comma separated args but nothing else

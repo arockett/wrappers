@@ -11,7 +11,7 @@ import os, sys
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from Wrapper import BasicWrapper
-from pyqtgui import OptionInputWindow
+from cligui import OptionInputWindow
 
 class CLIWrapper(BasicWrapper):
 
@@ -40,6 +40,7 @@ class CLIWrapper(BasicWrapper):
         app = QApplication(sys.argv)
         app.connect(app, SIGNAL("lastWindowClosed()"),
                     app, SLOT("quit()"))
+        self.win = self.create_window()
 
         def run():
             if self.isvalid(self.win.result):
@@ -48,7 +49,6 @@ class CLIWrapper(BasicWrapper):
             else:
                 print 'bad options'
 
-        self.win = OptionInputWindow(self.base_command, self.args, self.options)
         app.connect(self.win, SIGNAL("readyToRun()"), run)
         save = lambda (cm,arg,op)=self.win.result: self.save_options(cm,arg,op)
         app.connect(self.win, SIGNAL("readyToSave()"), save)
@@ -57,6 +57,9 @@ class CLIWrapper(BasicWrapper):
         app.exec_()
 
         sys.exit(0)
+
+    def create_window(self):
+        return OptionInputWindow(self.base_command, self.args, self.options)
 
     def run_command(self,cmd,opts):
         '''Run the command built from the OptionInputGui results.'''

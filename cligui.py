@@ -7,7 +7,7 @@
 #
 '''Gui used by CLIWrapper to get user inputted options.'''
 
-import os,sys
+import os
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
@@ -40,7 +40,7 @@ class OptionInputWindow(QMainWindow):
         # Horizontal line
         layout.addWidget(self.horizontal_line(),3,0)
         # Make buttonbox
-        layout.addLayout(self.buttonbox(),4,0)
+        layout.addLayout(self.fill_buttonbox(),4,0)
 
         widget.setLayout(layout)
         return widget
@@ -79,6 +79,8 @@ class OptionInputWindow(QMainWindow):
         #boolean_box = QVBoxLayout()
         #boolean_box.addWidget(QLabel("Boolean Options"))
         num_of_columns = int(len(self.options) / 6.0 + 1)
+        if len(self.options) % 6 == 0:
+            num_of_columns -= 1
 
         columns = []
         for i in range(num_of_columns):
@@ -168,11 +170,10 @@ class OptionInputWindow(QMainWindow):
             raw = raw[:-2]
         else:
             optional = True
-        result = raw
-        if ':' in result:
-            result = result.split(':')
+        if ':' in raw:
+            result = raw.split(':')
         else:
-            result = [result]
+            result = [raw]
         return result, optional
 
     def add_group(self,name,widget=None,layout=None,optional=True):
@@ -202,30 +203,30 @@ class OptionInputWindow(QMainWindow):
         else:
             self.options[index][2] = value
 
-    def new_bool(self,o,checked=False):
-        checkbox = QCheckBox(o[0])
+    def new_bool(self,obj,checked=False):
+        checkbox = QCheckBox(obj[0])
         if checked:
             checkbox.setChecked(checked)
             checkbox.stateChanged.connect(lambda: checkbox.setCheckState(2))
         else:
-            store = lambda: self.store_value(self.options.index(o),checkbox.isChecked())
+            store = lambda: self.store_value(self.options.index(obj),checkbox.isChecked())
             checkbox.stateChanged.connect(store)
         return checkbox
 
-    def new_string(self,o):
+    def new_string(self,obj):
         qedit = QLineEdit('')
-        if not isinstance(o,QString):
-            store = lambda: self.store_value(self.options.index(o),qedit.text())
+        if not isinstance(obj,QString):
+            store = lambda: self.store_value(self.options.index(obj),qedit.text())
         else:
             store = lambda s=qedit.text(): self.command.swap(s)
         qedit.textChanged.connect(store)
         return qedit
 
-    def new_file(self,o,ext='All Types (*)'):
+    def new_file(self,obj,ext='All Types (*)'):
         box = QHBoxLayout()
 
         qedit = QLineEdit('')
-        store = lambda: self.store_value(self.options.index(o),qedit.text())
+        store = lambda: self.store_value(self.options.index(obj),qedit.text())
         qedit.textChanged.connect(store)
         browse = QPushButton('Browse')
         browse.clicked.connect(lambda: self.select_file(qedit,ext))
@@ -250,11 +251,11 @@ class OptionInputWindow(QMainWindow):
 
             ledit.setText(path)
 
-    def new_directory(self,o):
+    def new_directory(self,obj):
         box = QHBoxLayout()
 
         qedit = QLineEdit('')
-        store = lambda: self.store_value(self.options.index(o),qedit.text())
+        store = lambda: self.store_value(self.options.index(obj),qedit.text())
         qedit.textChanged.connect(store)
         browse = QPushButton('Browse')
         browse.clicked.connect(lambda: self.select_dir(qedit))
@@ -280,40 +281,40 @@ class OptionInputWindow(QMainWindow):
 
             ledit.setText(path)
 
-    def new_int(self,o,min_=None,max_=None,step=1):
+    def new_int(self,obj,min_=None,max_=None,step=1):
         intspin = QSpinBox()
         if min_:
             intspin.setMinimum(int(min_))
         if max_:
             intspin.setMaximum(int(max_))
         intspin.setSingleStep(int(step))
-        store = lambda: self.store_value(self.options.index(o),intspin.value())
+        store = lambda: self.store_value(self.options.index(obj),intspin.value())
         intspin.valueChanged.connect(store)
         store()
         return intspin
 
 
-    def new_float(self,o,min_=None,max_=None,step=0.1):
+    def new_float(self,obj,min_=None,max_=None,step=0.1):
         doublespin = QDoubleSpinBox()
         if min_:
             doublespin.setMinimum(float(min_))
         if max_:
             doublespin.setMaximum(float(max_))
         doublespin.setSingleStep(float(step))
-        store = lambda: self.store_value(self.options.index(o),doublespin.value())
+        store = lambda: self.store_value(self.options.index(obj),doublespin.value())
         doublespin.valueChanged.connect(store)
         store()
         return doublespin
 
-    def new_menu(self,o,opts=[]):
+    def new_menu(self,obj,opts=[]):
         menu = QComboBox()
         for opt in opts:
             menu.addItem(opt,0)
-        store = lambda: self.store_value(self.options.index(o),menu.currentText())
+        store = lambda: self.store_value(self.options.index(obj),menu.currentText())
         menu.currentIndexChanged.connect(store)
         return menu
 
-    def buttonbox(self):
+    def fill_buttonbox(self):
         box = QHBoxLayout()
 
         save_button = QPushButton('Save')

@@ -25,6 +25,8 @@ class OptionInputWindow(QMainWindow):
         self.setWindowTitle("Parameter Manager")
         self.setCentralWidget(widget)
 
+        self.layout().setSizeConstraint(QLayout.SetFixedSize)
+
         self.result = self.command, self.args, self.options
 
     def new_tab(self):
@@ -194,7 +196,9 @@ class OptionInputWindow(QMainWindow):
     def store_value(self,index,value):
         print value
         print type(value)
-        if isinstance(value, QString):
+        if not isinstance(self.options[index][2], QString):
+            self.options[index][2] = value
+        elif isinstance(value, QString):
             self.options[index][2].swap(value)
         else:
             self.options[index][2] = value
@@ -310,6 +314,7 @@ class OptionInputWindow(QMainWindow):
             menu.addItem(opt,0)
         store = lambda: self.store_value(self.options.index(obj),menu.currentText())
         menu.currentIndexChanged.connect(store)
+        store()
         return menu
 
     def fill_buttonbox(self):
@@ -372,17 +377,11 @@ class OptionInputWindow(QMainWindow):
             except:
                 return False
             if isinstance(widget, QCheckBox):   # get indices of check boxes in bool_box
-                print frame
-                print widget
-                print widget.text()
                 try:
                     indices.append(opt_names.index(widget.text()))
                 except ValueError:
                     pass
             elif isinstance(widget, QGroupBox): # get indices of active groups
-                print frame
-                print widget
-                print widget.title()
                 if widget.isChecked():
                     try:
                         indices.append(opt_names.index(widget.title()))
@@ -419,6 +418,7 @@ class OptionInputWindow(QMainWindow):
                     opts.append([opt[0],opt[1],opt[2]])
         print self.command
         print self.args
+        print self.options
         print opts
         self.result = str(self.command), self.args, opts
 

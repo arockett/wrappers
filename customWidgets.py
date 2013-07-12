@@ -29,3 +29,18 @@ class CollapsibleFrame( QWidget ):
     def setLayout(self, layout):
         self.frame.setLayout(layout)
 
+class WindowStream(QDialog):
+
+    def __init__(self, parent=None):
+        QDialog.__init__(self,parent)
+        layout = QVBoxLayout()
+
+        self.setWindowTitle('Grab Frames')
+        self.textedit = QTextEdit()
+        layout.addWidget(self.textedit)
+
+        self.setLayout(layout)
+
+    def write(self, text):
+        self.textedit.append(text)
+

@@ -14,6 +14,7 @@ from PyQt4.QtGui import *
 from cliwrapper import CLIWrapper
 from cligui import OptionInputWindow
 from customWidgets import CollapsibleFrame
+import vidshop
 
 class ChamviewWrapper(CLIWrapper):
 
@@ -25,11 +26,11 @@ class ChamviewWrapper(CLIWrapper):
                 ('Start Time', ':'),
                 ('End Time', ':'),
                 ('Save Frames Directory', ':'),
-                ('Open Existing Points File', '-p:_file_:Text File,*.txt'),
-                ('Output Points File', '-o:_file_:Text File,*.txt'),
+                ('Open Existing Points File', '-p:_openfile_:Text File,*.txt'),
+                ('Output Points File', '-o:_savefile_:Text File,*.txt'),
                 ('Preprocessor', '-i:_menu_:'),
                 ('Chooser', '-c:_menu_:BasicGui'),
-                ('Store System Info in File', '-w:_file_:Text File,*.txt')]
+                ('Store System Info in File', '-w:_savefile_:Text File,*.txt')]
         CLIWrapper.__init__(self, command, args)
 
     def create_window(self):
@@ -64,32 +65,37 @@ class ChamviewWindow(OptionInputWindow):
         group.addWidget(self.im_dir_checkbox)
         group.addWidget(image_dir)
 
-        self.vid_file_checkbox = QRadioButton('Grab Frames from Video')
-        grab_frames = CollapsibleFrame(self.vid_file_checkbox)
-        layout = QVBoxLayout()
-        label = QLabel('Video File')
-        layout.addWidget(label)
-        layout.addLayout(self.new_file(self.options[1],'QuickTime Video (*.mov);;AVI Files (*.avi)'))
-        label = QLabel('Frames Per Second')
-        layout.addWidget(label)
-        layout.addWidget(self.new_int(self.options[2], 1, 100))
-        label = QLabel('Start Time')
-        layout.addWidget(label)
-        layout.addWidget(self.new_string(self.options[3]))
-        label = QLabel('Duration')
-        layout.addWidget(label)
-        layout.addWidget(self.new_string(self.options[4]))
-        label = QLabel('Directory to Save Frames In')
-        layout.addWidget(label)
-        save_dir = self.new_directory(self.options[5])
-        today = date.today()
-        DATE = str(today.year) + '_' + str(today.month) + '_' + str(today.day)
-        widget = save_dir.itemAt(0).widget().setText('~/' + DATE + 'frames/')
-        layout.addLayout(save_dir)
-        grab_frames.setLayout(layout)
-        self.vid_file_checkbox.setChecked(False)
-        group.addWidget(self.vid_file_checkbox)
-        group.addWidget(grab_frames)
+        if vidshop.ffmpeg_installed():
+            self.vid_file_checkbox = QRadioButton('Grab Frames from Video')
+            grab_frames = CollapsibleFrame(self.vid_file_checkbox)
+            layout = QVBoxLayout()
+            label = QLabel('Video File')
+            layout.addWidget(label)
+            layout.addLayout(self.new_file(self.options[1],'open','QuickTime Video (*.mov);;AVI Files (*.avi)'))
+            label = QLabel('Frames Per Second')
+            layout.addWidget(label)
+            layout.addWidget(self.new_int(self.options[2], 1, 100))
+            label = QLabel('Start Time (HH:MM:SS)')
+            layout.addWidget(label)
+            layout.addWidget(self.new_string(self.options[3]))
+            label = QLabel('End Time (HH:MM:SS)')
+            layout.addWidget(label)
+            layout.addWidget(self.new_string(self.options[4]))
+            label = QLabel('Directory to Save Frames In')
+            layout.addWidget(label)
+            save_dir = self.new_directory(self.options[5])
+            today = date.today()
+            DATE = str(today.year) + '_' + str(today.month) + '_' + str(today.day)
+            widget = save_dir.itemAt(0).widget().setText('~/' + DATE + 'frames/')
+            layout.addLayout(save_dir)
+            grab_frames.setLayout(layout)
+            self.vid_file_checkbox.setChecked(False)
+            group.addWidget(self.vid_file_checkbox)
+            group.addWidget(grab_frames)
+        else:
+            group.addStretch()
+            label = QLabel('*** Install FFMPEG to enable video input ***')
+            group.addWidget(label)
 
         in_media.setLayout(group)
         lbox.addWidget(in_media)
@@ -134,17 +140,10 @@ class ChamviewWindow(OptionInputWindow):
             begin_time = str(self.options[3][2])
             end_time = str(self.options[4][2])
             save_directory = str(self.options[5][2])
-            self.grab_frames(vid, fps, begin_time, end_time, save_directory)
+            vidshop.grab_frames(vid, fps, begin_time, end_time, save_directory)
             opts.append([obj[0], obj[1], str(self.options[5][2])])
 
         self.result = self.result[0], self.result[1], opts
-
-    def grab_frames(self, video, fps, start, end, save_dir):
-        print 'video: ' + video
-        print 'frames per second: ' + str(fps)
-        print 'start time: ' + start
-        print 'end time: ' + end
-        print 'save directory: ' + save_dir
 
 
 def main():

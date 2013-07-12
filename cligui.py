@@ -116,8 +116,10 @@ class OptionInputWindow(QMainWindow):
         elif blueprint[1] == '':
             opt[2] = QString('')
             widget = self.add_group(opt[0],widget=self.new_string(opt),optional=req)
-        elif blueprint[1] == '_file_':
+        elif blueprint[1] == '_openfile_' or blueprint[1] == '_savefile_':
             opt[2] = QString('')
+            if blueprint[1] == '_openfile_': category = 'open'
+            else: category = 'save'
             try:
                 filetypes = [tuple(ft.split(',')) for ft in blueprint[2:]]
                 filetype_str = ''
@@ -128,9 +130,9 @@ class OptionInputWindow(QMainWindow):
                     filetype_str = filetype_str[:-1] + ')'
                     filetype_str += ';;'
                 filetype_str = filetype_str[:-2]
-                widget = self.add_group(opt[0],layout=self.new_file(opt,filetype_str),optional=req)
+                widget = self.add_group(opt[0],layout=self.new_file(opt,category,filetype_str),optional=req)
             except IndexError:
-                widget = self.add_group(opt[0],layout=self.new_file(opt),optional=req)
+                widget = self.add_group(opt[0],layout=self.new_file(opt,category),optional=req)
         elif blueprint[1] == '_dir_':
             opt[2] = QString()
             widget = self.add_group(opt[0],layout=self.new_directory(opt),optional=req)
@@ -159,6 +161,8 @@ class OptionInputWindow(QMainWindow):
                 widget = self.add_group(opt[0],widget=self.new_menu(opt,choices),optional=req)
             except IndexError:
                 widget = self.add_group(opt[0],widget=self.new_menu(opt),optional=req)
+        else:
+            print blueprint[1]
 
         return widget
 
@@ -224,24 +228,29 @@ class OptionInputWindow(QMainWindow):
         qedit.textChanged.connect(store)
         return qedit
 
-    def new_file(self,obj,ext='All Types (*)'):
+    def new_file(self,obj,open_or_save='open',ext='All Types (*)'):
         box = QHBoxLayout()
 
         qedit = QLineEdit('')
         store = lambda: self.store_value(self.options.index(obj),qedit.text())
         qedit.textChanged.connect(store)
         browse = QPushButton('Browse')
-        browse.clicked.connect(lambda: self.select_file(qedit,ext))
+        browse.clicked.connect(lambda: self.select_file(qedit,ext,open_or_save))
 
         box.addWidget(qedit)
         #box.addSeparator(2)
         box.addWidget(browse)
         return box
 
-    def select_file(self,ledit,extensions):
-        path = QFileDialog.getOpenFileName(None,QString("Select File"),
-                                                QString(os.getcwd()),
-                                                QString(extensions))
+    def select_file(self,ledit,extensions,spec='open'):
+        if spec == 'open':
+            path = QFileDialog.getOpenFileName(None,QString("Select File"),
+                                                    QString(os.getcwd()),
+                                                    QString(extensions))
+        elif spec == 'save':
+            path = QFileDialog.getSaveFileName(None,QString("Save File"),
+                                                    QString(os.getcwd()),
+                                                    QString(extensions))
         if path:
             # Account for spaces in the path
             dirs = str(path).split('/')
